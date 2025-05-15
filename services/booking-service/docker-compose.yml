@@ -1,0 +1,28 @@
+services:
+  booking-api:
+    build:
+      context: .
+      dockerfile: Booking/Dockerfile
+    container_name: booking-api
+    depends_on:
+      - booking-db
+    ports:
+      - "8017:8017"
+    restart: 
+        always
+  
+  booking-db:
+    image: mysql:8.0
+    container_name: booking-db
+    environment:
+        MYSQL_ROOT_PASSWORD: 12345678
+        MYSQL_DATABASE: booking
+    restart:
+        always
+    ports:
+      - "3312:3306"
+      
+    
+  
+    
+    
