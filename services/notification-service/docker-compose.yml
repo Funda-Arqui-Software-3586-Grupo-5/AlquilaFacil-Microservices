@@ -1,0 +1,24 @@
+services:
+  notification-api:
+    image: notification
+    container_name: notification-api
+    build:
+      context: .
+      dockerfile: Notification/Dockerfile
+    ports:
+      - "8014:8014"
+    depends_on:
+      - notification-db
+    restart:
+      always
+  
+  notification-db:
+    image: mysql:8.0
+    container_name: notification-db
+    ports:
+      - "3309:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: notification
+    restart:
+      always
