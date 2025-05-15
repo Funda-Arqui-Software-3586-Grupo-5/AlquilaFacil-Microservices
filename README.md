@@ -27,14 +27,27 @@ docker-compose up -d
 ```
 
 3. Access the application:
-    - API Gateway: `http://localhost:5000`
+    - API Gateway: `http://localhost:8000`
     - MySQL: `http://localhost:3306`
     - IAM: `http://localhost:8012`
     - Local Management: `http://localhost:8013`
-    - Profile: `http://localhost:8014`
-    - Notification: `http://localhost:8015`
+    - Notification: `http://localhost:8014`
+    - Profile: `http://localhost:8015`
     - Subscription: `http://localhost:8016`
     - Booking: `http://localhost:8017`
+
+How to works the application:
+You can use Postman to test the API endpoints. The following endpoints are available:
+- **IAM**:
+  - Login: `POST http://localhost:8000/iam/authentication/sign-in`
+  ```
+    {
+        "email": "ari2@mono.com",
+        "password": "Ari123456#"
+    }
+  ```
+
+The API GW was implemented using Ocelot, which is a .NET API Gateway that provides routing and load balancing capabilities for microservices. The API Gateway acts as a single entry point for all requests to the microservices, allowing for easier management and monitoring of the services.
 
 - Author:
 - [Funda Arqui Software](Grupo 5 - Fundamentos de Arquitectura de Software)
