@@ -27,7 +27,7 @@ docker-compose up --build
 ```
 
 3. Access the application:
-    - API Gateway: `http://localhost:5000`
+    - API Gateway: `http://localhost:8000`
     - MySQL: `http://localhost:3306`
     - IAM: `http://localhost:8012`
     - Local Management: `http://localhost:8013`
@@ -35,6 +35,17 @@ docker-compose up --build
     - Notification: `http://localhost:8015`
     - Subscription: `http://localhost:8016`
     - Booking: `http://localhost:8017`
+
+How to works the application:
+You can use Postman to test the API endpoints. The following endpoints are available:
+- **IAM**:
+  - Login: `POST http://localhost:8000/iam/authentication/sign-in`
+  ```
+    {
+        "email": "ari2@mono.com",
+        "password": "Ari123456#"
+    }
+  ```
 
 - Author:
 - [Funda Arqui Software](Grupo 5 - Fundamentos de Arquitectura de Software)
