@@ -1,0 +1,28 @@
+﻿services:
+  local-api:
+    build:
+      context: .
+      dockerfile: LocalManagement/Dockerfile
+    container_name: local-api
+    depends_on:
+      - local-db
+    ports:
+      - "8013:8013"
+    restart:
+      always
+  
+  local-db:
+    image: mysql:8.0
+    container_name: local-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: local
+    restart:
+      always
+    ports:
+      - "3308:3306"
+      
+    
+  
+    
+    

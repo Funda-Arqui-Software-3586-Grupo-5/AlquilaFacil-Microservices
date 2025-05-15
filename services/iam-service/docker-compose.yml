@@ -1,0 +1,31 @@
+﻿
+services:
+  iam-api:
+    build:
+      context: .
+      dockerfile: IAM/Dockerfile
+    container_name: iam-api
+    depends_on:
+      - iam-db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      - "8012:8012"
+    restart:
+      always
+
+  iam-db:
+    image: mysql:8.0
+    container_name: iam-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: iam
+    ports:
+      - "3307:3306"
+    restart:
+      always
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

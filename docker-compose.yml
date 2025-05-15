@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # IAM microservice
+  iam-api-service:
+    build:
+      context: ./services/iam-service
+      dockerfile: IAM/Dockerfile
+    container_name: iam-api-service
+    ports:
+      - "8012:8012"
+    restart: always
+    depends_on:
+      - iam-db-service
+
+  iam-db-service:
+    image: mysql:8.0
+    container_name: iam-db-service
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: iam
+    ports:
+      - "3307:3306"
+    restart: always
+
+  # Local Management microservice
+  local-api-service:
+    build:
+      context: ./services/local-management-service
+      dockerfile: LocalManagement/Dockerfile
+    container_name: local-api-service
+    ports:
+      - "8013:8013"
+    restart: always
+    depends_on:
+      - local-db-service
+
+  local-db-service:
+    image: mysql:8.0
+    container_name: local-db-service
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: local
+    ports:
+      - "3308:3306"
+    restart: always
