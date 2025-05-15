@@ -2,20 +2,20 @@ version: '3.8'
 
 services:
   # IAM microservice
-  iam-api-service:
+  iam-api:
     build:
       context: ./services/iam-service
       dockerfile: IAM/Dockerfile
-    container_name: iam-api-service
+    container_name: iam-api
     ports:
       - "8012:8012"
     restart: always
     depends_on:
-      - iam-db-service
+      - iam-db
 
-  iam-db-service:
+  iam-db:
     image: mysql:8.0
-    container_name: iam-db-service
+    container_name: iam-db
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
       MYSQL_DATABASE: iam
@@ -24,20 +24,20 @@ services:
     restart: always
 
   # Local Management microservice
-  local-api-service:
+  local-api:
     build:
       context: ./services/local-management-service
       dockerfile: LocalManagement/Dockerfile
-    container_name: local-api-service
+    container_name: local-api
     ports:
       - "8013:8013"
     restart: always
     depends_on:
-      - local-db-service
+      - local-db
 
-  local-db-service:
+  local-db:
     image: mysql:8.0
-    container_name: local-db-service
+    container_name: local-db
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
       MYSQL_DATABASE: local
@@ -46,23 +46,53 @@ services:
     restart: always
 
   # Profile microservice
-  profile-api-service:
+  profile-api:
     build:
       context: ./services/profile-service
       dockerfile: Profiles/Dockerfile
-    container_name: profile-api-service
+    container_name: profile-api
     ports:
       - "8015:8015"
     restart: always
     depends_on:
-      - profile-db-service
+      - profile-db
 
-  profile-db-service:
+  profile-db:
     image: mysql:8.0
-    container_name: profile-db-service
+    container_name: profile-db
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
       MYSQL_DATABASE: profiles
     ports:
       - "3310:3306"
     restart: always
+
+  # Booking microservice
+  services:
+  booking-api:
+    build:
+      context: ./services/booking-service
+      dockerfile: Booking/Dockerfile
+    container_name: booking-api
+    depends_on:
+      - booking-db
+    ports:
+      - "8017:8017"
+    restart: 
+        always
+  
+  booking-db:
+    image: mysql:8.0
+    container_name: booking-db
+    environment:
+        MYSQL_ROOT_PASSWORD: 12345678
+        MYSQL_DATABASE: booking
+    restart:
+        always
+    ports:
+      - "3312:3306"
+      
+    
+  
+    
+    
