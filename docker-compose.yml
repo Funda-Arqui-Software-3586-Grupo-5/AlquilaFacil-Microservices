@@ -91,6 +91,55 @@ services:
         always
     ports:
       - "3312:3306"
+
+  # Notification microservice
+  notification-api:
+    image: notification
+    container_name: notification-api
+    build:
+      context: ./services/notification-service
+      dockerfile: Notification/Dockerfile
+    ports:
+      - "8014:8014"
+    depends_on:
+      - notification-db
+    restart:
+      always
+
+  notification-db:
+    image: mysql:8.0
+    container_name: notification-db
+    ports:
+      - "3309:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: notification
+    restart:
+      always
+
+  # Subscription microservice
+  subscription-api:
+    build:
+      context: ./services/subscription-service
+      dockerfile: Subscriptions/Dockerfile
+    container_name: subscription-api
+    depends_on:
+      - subscriptions-db
+    ports:
+      - "8016:8016"
+    restart:
+      always
+
+  subscriptions-db:
+    image: mysql:8.0
+    container_name: subscriptions-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: subscriptions
+    ports:
+      - "3311:3306"
+    restart:
+      always
       
     
   
