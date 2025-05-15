@@ -68,7 +68,6 @@ services:
     restart: always
 
   # Booking microservice
-  services:
   booking-api:
     build:
       context: ./services/booking-service
