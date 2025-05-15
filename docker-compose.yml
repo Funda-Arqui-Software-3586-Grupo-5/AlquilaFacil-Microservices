@@ -140,6 +140,23 @@ services:
     restart:
       always
       
+  # Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: ApiGateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8000:80"
+    depends_on:
+      - iam-api
+      - local-api
+      - profile-api
+      - booking-api
+      - notification-api
+      - subscription-api
+    restart:
+      always
     
   
     
