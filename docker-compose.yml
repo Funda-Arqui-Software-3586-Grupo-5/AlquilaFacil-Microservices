@@ -44,3 +44,25 @@ services:
     ports:
       - "3308:3306"
     restart: always
+
+  # Profile microservice
+  profile-api-service:
+    build:
+      context: ./services/profile-service
+      dockerfile: Profiles/Dockerfile
+    container_name: profile-api-service
+    ports:
+      - "8015:8015"
+    restart: always
+    depends_on:
+      - profile-db-service
+
+  profile-db-service:
+    image: mysql:8.0
+    container_name: profile-db-service
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: profiles
+    ports:
+      - "3310:3306"
+    restart: always
