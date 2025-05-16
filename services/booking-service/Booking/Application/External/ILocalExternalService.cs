@@ -8,5 +8,4 @@ public interface ILocalExternalService
 {
     Task<bool> LocalReservationExists(int reservationId);
     Task<IEnumerable<LocalDto>> GetLocalsByUserId(int userId);
-    Task<bool> IsLocalOwner(int userId, int localId);
 }

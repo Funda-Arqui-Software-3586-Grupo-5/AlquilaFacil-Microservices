@@ -13,7 +13,5 @@ public class LocalExternalService(ILocalsContextFacade _localsContextFacade) : I
 
     public async Task<IEnumerable<LocalDto>> GetLocalsByUserId(int userId) =>
         await _localsContextFacade.GetLocalsByUserId(userId);
-
-    public async Task<bool> IsLocalOwner(int userId, int localId) =>
-        await _localsContextFacade.IsLocalOwner(userId, localId);
+    
 }
