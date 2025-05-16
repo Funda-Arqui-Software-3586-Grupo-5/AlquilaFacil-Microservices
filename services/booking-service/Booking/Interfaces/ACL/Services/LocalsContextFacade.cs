@@ -43,25 +43,5 @@ public class LocalsContextFacade : ILocalsContextFacade
             PropertyNameCaseInsensitive = true
         })!;
     }
-
-    public async Task<bool> IsLocalOwner(int userId, int localId)
-    {
-        var endpoint = $"http://local-api:8013/api/v1/locals/get-user-locals/{userId}";
-        var response = await _httpClient.GetAsync(endpoint);
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new Exception($"Error checking local ownership: {response.StatusCode}");
-        }
-
-        var content = await response.Content.ReadAsStringAsync();
-        var locals = JsonSerializer.Deserialize<IEnumerable<LocalDto>>(content, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        })!;
-        if (locals == null || !locals.Any())
-        {
-            return false;
-        }
-        return true;
-    }
+    
 }
