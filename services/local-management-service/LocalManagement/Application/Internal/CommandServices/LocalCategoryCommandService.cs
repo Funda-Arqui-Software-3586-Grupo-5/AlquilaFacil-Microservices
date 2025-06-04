@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Reflection;
+using LocalManagement.Domain.AMQP;
 using LocalManagement.Domain.Model.Commands;
 using LocalManagement.Domain.Model.Entities;
 using LocalManagement.Domain.Model.ValueObjects;
@@ -9,7 +10,7 @@ using LocalManagement.Shared.Domain.Repositories;
 
 namespace LocalManagement.Application.Internal.CommandServices;
 
-public class LocalCategoryCommandService(ILocalCategoryRepository localCategoryRepository, IUnitOfWork unitOfWork) : ILocalCategoryCommandService
+public class LocalCategoryCommandService(ILocalCategoryRepository localCategoryRepository, IUnitOfWork unitOfWork, IMessagePublisher messagePublisher) : ILocalCategoryCommandService
 {
     
     public async Task Handle(SeedLocalCategoriesCommand command)
@@ -39,6 +40,7 @@ public class LocalCategoryCommandService(ILocalCategoryRepository localCategoryR
 
                 var localCategory = new LocalCategory(attributeDescription, photoUrl);
                 await localCategoryRepository.AddAsync(localCategory);
+                await messagePublisher.SendMessageAsync(command);
             }
         }
         await unitOfWork.CompleteAsync();

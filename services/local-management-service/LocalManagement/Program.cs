@@ -1,20 +1,25 @@
 using LocalManagement.Application.External;
 using LocalManagement.Application.External.OutboundServices;
 using LocalManagement.Application.Internal.CommandServices;
+using LocalManagement.Application.Internal.Consumers;
+using LocalManagement.Application.Internal.Publishers;
 using LocalManagement.Application.Internal.QueryServices;
+using LocalManagement.Domain.AMQP;
 using LocalManagement.Domain.Model.Commands;
 using LocalManagement.Domain.Repositories;
 using LocalManagement.Domain.Services;
 using LocalManagement.Infrastructure.IAM;
 using LocalManagement.Infrastructure.Persistence.EFC.Repositories;
-using LocalManagement.Interfaces.ACL;
-using LocalManagement.Interfaces.ACL.Services;
+using LocalManagement.Shared.Application.EventHandlers;
+using LocalManagement.Shared.Application.Hosted;
+using LocalManagement.Shared.Domain.Model.ValueObjects;
 using LocalManagement.Shared.Domain.Repositories;
 using LocalManagement.Shared.Infrastructure.Persistence.EFC.Configuration;
 using LocalManagement.Shared.Infrastructure.Persistence.EFC.Repositories;
 using LocalManagement.Shared.Interfaces.ASP.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,13 +92,11 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+builder.Services.AddScoped<IMessagePublisher, MessagePublisher>();
 
 
 builder.Services.AddScoped<ILocalCommandService, LocalCommandService>();
 builder.Services.AddScoped<ILocalQueryService, LocalQueryService>();
-builder.Services.AddScoped<ILocalsContextFacade, LocalsContextFacade>();
 builder.Services.AddScoped<ILocalRepository, LocalRepository>();
 builder.Services.AddScoped<ILocalCategoryRepository, LocalCategoryRepository>();
 
@@ -109,9 +112,7 @@ builder.Services.AddScoped<IReportCommandService, ReportCommandService>();
 builder.Services.AddScoped<IReportQueryService, ReportQueryService>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
-builder.Services.AddScoped<IUserCommentExternalService, UserCommentExternalService>();
 builder.Services.AddScoped<IUserExternalService, UserExternalService>();
-builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
 
 builder.Services.AddHttpClient();
 
@@ -119,6 +120,21 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(8013); 
 });
+
+var factory = new ConnectionFactory
+{
+    Uri = new Uri(builder.Configuration["Host"]),
+    DispatchConsumersAsync = true,
+};
+
+var connection = factory.CreateConnection();
+var channel = connection.CreateModel();
+
+builder.Services.AddSingleton(connection);
+builder.Services.AddSingleton(channel);
+builder.Services.AddSingleton(new RabbitMqChannelWrapper(channel));
+builder.Services.AddSingleton<MessageConsumer>();
+builder.Services.AddHostedService<RabbitMqConsumerHostedService>();
 
 
 var app = builder.Build();
@@ -128,6 +144,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
+    
+    services.StartPublishing(builder.Configuration, channel);
     
     
     var localCategoryTypeCommandService = services.GetRequiredService<ILocalCategoryCommandService>();

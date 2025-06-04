@@ -1,4 +1,4 @@
-namespace LocalManagement.Application.External;
+namespace LocalManagement.Application.External.OutboundServices;
 
 public interface IUserExternalService
 {

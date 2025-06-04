@@ -1,4 +1,6 @@
 using LocalManagement.Application.External;
+using LocalManagement.Application.External.OutboundServices;
+using LocalManagement.Domain.AMQP;
 using LocalManagement.Domain.Model.Aggregates;
 using LocalManagement.Domain.Model.Commands;
 using LocalManagement.Domain.Model.Queries;
@@ -8,7 +10,7 @@ using LocalManagement.Shared.Domain.Repositories;
 
 namespace LocalManagement.Application.Internal.CommandServices;
 
-public class ReportCommandService (IReportRepository reportRepository, IUnitOfWork unitOfWork, ILocalQueryService localQueryService, IUserExternalService userExternalService) : IReportCommandService
+public class ReportCommandService (IReportRepository reportRepository, IUnitOfWork unitOfWork, ILocalQueryService localQueryService, IUserExternalService userExternalService, IMessagePublisher messagePublisher) : IReportCommandService
 {
     public async Task<Report?> Handle(CreateReportCommand command)
     {
@@ -29,6 +31,7 @@ public class ReportCommandService (IReportRepository reportRepository, IUnitOfWo
 
         var report = new Report(command);
         await reportRepository.AddAsync(report);
+        await messagePublisher.SendMessageAsync(command);
         await unitOfWork.CompleteAsync();
         return report;
     }
@@ -41,6 +44,7 @@ public class ReportCommandService (IReportRepository reportRepository, IUnitOfWo
             throw new Exception("Report not found");
         }
         reportRepository.Remove(reportToDelete);
+        await messagePublisher.SendMessageAsync(command);
         await unitOfWork.CompleteAsync();
         return reportToDelete;
     }

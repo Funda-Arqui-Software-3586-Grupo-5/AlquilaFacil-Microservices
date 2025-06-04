@@ -1,4 +1,5 @@
 using LocalManagement.Application.External.OutboundServices;
+using LocalManagement.Domain.AMQP;
 using LocalManagement.Domain.Model.Aggregates;
 using LocalManagement.Domain.Model.Commands;
 using LocalManagement.Domain.Repositories;
@@ -7,7 +8,7 @@ using LocalManagement.Shared.Domain.Repositories;
 
 namespace LocalManagement.Application.Internal.CommandServices;
 
-public class CommentCommandService(ICommentRepository commentRepository, ILocalRepository localRepository, IUserCommentExternalService userCommentExternalService, IUnitOfWork unitOfWork) : ICommentCommandService
+public class CommentCommandService(ICommentRepository commentRepository, ILocalRepository localRepository, IUserExternalService userCommentExternalService, IUnitOfWork unitOfWork, IMessagePublisher messagePublisher) : ICommentCommandService
 {
     public async Task<Comment?> Handle(CreateCommentCommand command)
     {
@@ -30,6 +31,7 @@ public class CommentCommandService(ICommentRepository commentRepository, ILocalR
 
         var comment = new Comment(command);
         await commentRepository.AddAsync(comment);
+        await messagePublisher.SendMessageAsync(command);
         await unitOfWork.CompleteAsync();
         return comment;
     }

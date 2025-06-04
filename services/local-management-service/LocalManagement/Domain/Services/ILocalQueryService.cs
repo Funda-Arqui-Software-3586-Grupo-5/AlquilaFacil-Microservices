@@ -7,7 +7,7 @@ public interface ILocalQueryService
 {
     Task<IEnumerable<Local>> Handle(GetAllLocalsQuery query);
     Task<Local?> Handle(GetLocalByIdQuery query);
-    HashSet<string> Handle(GetAllLocalDistrictsQuery query);
+    Task<HashSet<string>> Handle(GetAllLocalDistrictsQuery query);
     
     Task<IEnumerable<Local>> Handle(GetLocalsByUserIdQuery query);
     Task<IEnumerable<Local>> Handle(GetLocalsByCategoryIdAndCapacityRangeQuery query);

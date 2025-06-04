@@ -2,9 +2,8 @@ using LocalManagement.Application.External.OutboundServices;
 
 namespace LocalManagement.Infrastructure.IAM;
 
-public class UserCommentExternalService(HttpClient httpClient) : IUserCommentExternalService
+public class UserExternalService(HttpClient httpClient) : IUserExternalService
 {
-
     public async Task<bool> UserExists(int userId)
     {
         var endpoint = $"http://iam-api:8012/api/v1/users/{userId}/exists";
@@ -16,7 +15,5 @@ public class UserCommentExternalService(HttpClient httpClient) : IUserCommentExt
         var result = await response.Content.ReadAsStringAsync();
         Console.WriteLine(result);
         return bool.Parse(result);
-        
-
     }
 }

@@ -1,4 +1,5 @@
 using LocalManagement.Application.External.OutboundServices;
+using LocalManagement.Domain.AMQP;
 using LocalManagement.Domain.Model.Commands;
 using LocalManagement.Domain.Repositories;
 using LocalManagement.Domain.Services;
@@ -7,7 +8,7 @@ using Local = LocalManagement.Domain.Model.Aggregates.Local;
 
 namespace LocalManagement.Application.Internal.CommandServices;
 
-public class LocalCommandService (IUserCommentExternalService userCommentExternalService, ILocalRepository localRepository, ILocalCategoryRepository localCategoryRepository, IUnitOfWork unitOfWork) : ILocalCommandService
+public class LocalCommandService (IUserExternalService userCommentExternalService, ILocalRepository localRepository, ILocalCategoryRepository localCategoryRepository, IUnitOfWork unitOfWork, IMessagePublisher messagePublisher) : ILocalCommandService
 {
     
     public async Task<Local?> Handle(CreateLocalCommand command)
@@ -29,6 +30,7 @@ public class LocalCommandService (IUserCommentExternalService userCommentExterna
         }
         var local = new Local(command);
         await localRepository.AddAsync(local);
+        await messagePublisher.SendMessageAsync(command);
         await unitOfWork.CompleteAsync();
         return local;
     }
@@ -52,6 +54,7 @@ public class LocalCommandService (IUserCommentExternalService userCommentExterna
         }
         localRepository.Update(local);
         local.Update(command);
+        await messagePublisher.SendMessageAsync(command);
         await unitOfWork.CompleteAsync();
         return local;
     }
