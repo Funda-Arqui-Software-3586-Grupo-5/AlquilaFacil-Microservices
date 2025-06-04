@@ -7,13 +7,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Profiles.Application.External.OutboundServices;
 using Profiles.Application.Internal.CommandServices;
+using Profiles.Application.Internal.Consumers;
+using Profiles.Application.Internal.Publishers;
 using Profiles.Application.Internal.QueryServices;
+using Profiles.Domain.AMQP;
 using Profiles.Infrastructure.IAM;
 using Profiles.Infrastructure.Persistence.EFC.Repositories;
 using Profiles.Infrastructure.Subscriptions;
 using Profiles.Interfaces.ACL.Services;
+using Profiles.Shared.Application.EventHandlers;
+using Profiles.Shared.Application.Hosted;
+using Profiles.Shared.Domain.Model.ValueObjects;
 using Profiles.Shared.Infrastructure.Persistence.EFC.Configuration;
 using Profiles.Shared.Infrastructure.Persistence.EFC.Repositories;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +92,7 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IMessagePublisher,MessagePublisher>();
 
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 builder.Services.AddScoped<IProfileCommandService, ProfileCommandService>();
@@ -100,6 +108,22 @@ builder.WebHost.UseKestrel(options =>
     options.ListenAnyIP(8015);
 });
 
+
+var factory = new ConnectionFactory
+{
+    Uri = new Uri(builder.Configuration["Host"]),
+    DispatchConsumersAsync = true,
+};
+
+var connection = factory.CreateConnection();
+var channel = connection.CreateModel();
+
+builder.Services.AddSingleton(connection);
+builder.Services.AddSingleton(channel);
+builder.Services.AddSingleton(new RabbitMqChannelWrapper(channel));
+builder.Services.AddSingleton<MessageConsumer>();
+builder.Services.AddHostedService<RabbitMqConsumerHostedService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -107,7 +131,11 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
+    
+   services.StartPublishing(builder.Configuration, channel);
 }
+
+
 
 
 

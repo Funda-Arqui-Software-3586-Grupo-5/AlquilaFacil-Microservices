@@ -4,11 +4,12 @@ using AlquilaFacilPlatform.Profiles.Domain.Services;
 using AlquilaFacilPlatform.Shared.Domain.Repositories;
 using Profiles.Application.External;
 using Profiles.Application.External.OutboundServices;
+using Profiles.Domain.AMQP;
 using Profiles.Domain.Model.Aggregates;
 
 namespace Profiles.Application.Internal.CommandServices;
 
-public class ProfileCommandService(IUserExternalService userExternalService,IProfileRepository profileRepository, IUnitOfWork unitOfWork) : IProfileCommandService
+public class ProfileCommandService(IUserExternalService userExternalService,IProfileRepository profileRepository, IUnitOfWork unitOfWork, IMessagePublisher messagePublisher) : IProfileCommandService
 {
     public async Task<Profile?> Handle(CreateProfileCommand command)
     {
@@ -24,6 +25,7 @@ public class ProfileCommandService(IUserExternalService userExternalService,IPro
             throw new Exception("Phone number must to be valid");
         }
         await profileRepository.AddAsync(profile);
+        await messagePublisher.SendMessageAsync(command);
         await unitOfWork.CompleteAsync();
         return profile;
     }
@@ -39,6 +41,7 @@ public class ProfileCommandService(IUserExternalService userExternalService,IPro
         profile.Update(command);
         profile.UserId = userId;
         await unitOfWork.CompleteAsync();
+        await messagePublisher.SendMessageAsync(command);
         return profile;
     }
 }
