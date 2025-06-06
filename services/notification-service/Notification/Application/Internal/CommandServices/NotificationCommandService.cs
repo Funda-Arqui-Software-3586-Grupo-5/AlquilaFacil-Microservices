@@ -1,4 +1,5 @@
 using Notification.Application.External;
+using Notification.Domain.AMQP;
 using Notification.Domain.Models.Commands;
 using Notification.Domain.Repositories;
 using Notification.Domain.Services;
@@ -9,7 +10,8 @@ namespace Notification.Application.Internal.CommandServices;
 public class NotificationCommandService(
     IExternalUserService externalUserService,
     IUnitOfWork unitOfWork,
-    INotificationRepository notificationRepository
+    INotificationRepository notificationRepository, 
+    IMessagePublisher messagePublisher
     ) : INotificationCommandService
 {
     public async Task<Domain.Models.Aggregates.Notification> Handle(CreateNotificationCommand command)
@@ -21,6 +23,7 @@ public class NotificationCommandService(
             throw new Exception("This user does not exist");
         }
         await notificationRepository.AddAsync(notification);
+        await messagePublisher.SendMessageAsync(command);
         await unitOfWork.CompleteAsync();
         return notification;
     }
@@ -34,6 +37,7 @@ public class NotificationCommandService(
         }
         notificationRepository.Remove(notification);
         await unitOfWork.CompleteAsync();
+        await messagePublisher.SendMessageAsync(command);
         return notification;
     }
 }

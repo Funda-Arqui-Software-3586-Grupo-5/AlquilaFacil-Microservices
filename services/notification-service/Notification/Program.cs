@@ -2,16 +2,23 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Notification.Application.External;
 using Notification.Application.Internal.CommandServices;
+using Notification.Application.Internal.Consumers;
 using Notification.Application.Internal.QueryServices;
+using Notification.Application.Publishers;
+using Notification.Domain.AMQP;
 using Notification.Domain.Repositories;
 using Notification.Domain.Services;
 using Notification.Infrastructure.IAM;
 using Notification.Infrastructure.Persistence.EFC.Repositories;
+using Notification.Shared.Application.EventHandlers;
+using Notification.Shared.Application.Hosted;
+using Notification.Shared.Domain.Model.ValueObjects;
 using Notification.Shared.Domain.Repositories;
 using Notification.Shared.Infrastructure.Persistence.EFC.Configuration;
 using Notification.Shared.Infrastructure.Persistence.EFC.Repositories;
 using Notification.Shared.Interfaces.ASP.Configuration;
 using Notifications.Shared.Infrastructure.Persistence.EFC.Configuration;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +92,7 @@ builder.Services.AddScoped<IExternalUserService, ExternalUserService>();
 
 // Shared Bounded Context Injection Configuration
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IMessagePublisher,MessagePublisher>();
 
 // Profiles Bounded Context Injection Configuration
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -98,6 +106,21 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(8014);
 });
 
+var factory = new ConnectionFactory
+{
+    Uri = new Uri(builder.Configuration["Host"]),
+    DispatchConsumersAsync = true,
+};
+
+var connection = factory.CreateConnection();
+var channel = connection.CreateModel();
+
+builder.Services.AddSingleton(connection);
+builder.Services.AddSingleton(channel);
+builder.Services.AddSingleton(new RabbitMqChannelWrapper(channel));
+builder.Services.AddSingleton<MessageConsumer>();
+builder.Services.AddHostedService<RabbitMqConsumerHostedService>();
+
 //builder.Services.AddHttpClient();
 
 var app = builder.Build();
@@ -107,6 +130,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
+    
+    services.StartPublishing(builder.Configuration, channel);
 }
 
 // Configure the HTTP request pipeline.
