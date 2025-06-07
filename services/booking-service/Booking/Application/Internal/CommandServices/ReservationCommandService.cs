@@ -5,12 +5,13 @@ using Booking.Domain.Model.Commands;
 using Booking.Domain.Repositories;
 using Booking.Domain.Services;
 using Booking.Shared.Domain.Repositories;
+using Booking.Domain.AMQP;
 
 namespace Booking.Application.Internal.CommandServices;
 
 public class ReservationCommandService(
  IUserReservationExternalService userReservationExternalService,
- ILocalExternalService localExternalService, IReservationRepository reservationRepository,IUnitOfWork unitOfWork) : IReservationCommandService
+ ILocalExternalService localExternalService, IReservationRepository reservationRepository,IUnitOfWork unitOfWork, IMessagePublisher messagePublisher) : IReservationCommandService
 {
  public async Task<Reservation> Handle(CreateReservationCommand reservation)
  {
@@ -38,6 +39,7 @@ public class ReservationCommandService(
          throw new Exception("End date must be greater than current date");
      }
      
+    await messagePublisher.SendMessageAsync(reservation);
 
      var reservationCreated = new Reservation(reservation);
      await reservationRepository.AddAsync(reservationCreated);
