@@ -14,6 +14,13 @@ using Booking.Shared.Infrastructure.Persistence.EFC.Repositories;
 using Booking.Shared.Interfaces.ASP.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Booking.Application.Internal.Consumers;
+using Booking.Application.Internal.Publishers;
+using Booking.Domain.AMQP;
+using Booking.Shared.Application.EventHandlers;
+using Booking.Shared.Application.Hosted;
+using Booking.Shared.Domain.Model.ValueObjects;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,7 +93,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-//builder.Services.AddScoped<ISubscriptionInfoExternalService,SubscriptionInfoExternalService>();
+builder.Services.AddScoped<IMessagePublisher, MessagePublisher>();
 
 
 // Shared Bounded Context Injection Configuration
@@ -113,6 +120,21 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(8017); // ← importante
 });
 
+var factory = new ConnectionFactory
+{
+    Uri = new Uri(builder.Configuration["Host"]),
+    DispatchConsumersAsync = true
+};
+
+var connection = factory.CreateConnection();
+var channel = connection.CreateModel();
+
+builder.Services.AddSingleton(connection);
+builder.Services.AddSingleton(channel);
+builder.Services.AddSingleton(new RabbitMqChannelWrapper(channel));
+builder.Services.AddSingleton<MessageConsumer>();
+builder.Services.AddHostedService<RabbitMqConsumerHostedService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -120,6 +142,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
+
+    services.StartPublishing(builder.Configuration, channel);
 }
 
 
