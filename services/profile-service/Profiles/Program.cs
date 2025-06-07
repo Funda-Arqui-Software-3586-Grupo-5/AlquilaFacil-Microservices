@@ -1,6 +1,5 @@
 using AlquilaFacilPlatform.Profiles.Domain.Repositories;
 using AlquilaFacilPlatform.Profiles.Domain.Services;
-using AlquilaFacilPlatform.Profiles.Interfaces.ACL;
 using AlquilaFacilPlatform.Shared.Domain.Repositories;
 using AlquilaFacilPlatform.Shared.Interfaces.ASP.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +13,6 @@ using Profiles.Domain.AMQP;
 using Profiles.Infrastructure.IAM;
 using Profiles.Infrastructure.Persistence.EFC.Repositories;
 using Profiles.Infrastructure.Subscriptions;
-using Profiles.Interfaces.ACL.Services;
 using Profiles.Shared.Application.EventHandlers;
 using Profiles.Shared.Application.Hosted;
 using Profiles.Shared.Domain.Model.ValueObjects;
@@ -97,7 +95,6 @@ builder.Services.AddScoped<IMessagePublisher,MessagePublisher>();
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 builder.Services.AddScoped<IProfileCommandService, ProfileCommandService>();
 builder.Services.AddScoped<IProfileQueryService, ProfileQueryService>();
-builder.Services.AddScoped<IProfilesContextFacade, ProfilesContextFacade>();
 
 builder.Services.AddScoped<IUserExternalService, UserExternalService>();
 builder.Services.AddScoped<ISubscriptionExternalService, SubscriptionExternalService>();
