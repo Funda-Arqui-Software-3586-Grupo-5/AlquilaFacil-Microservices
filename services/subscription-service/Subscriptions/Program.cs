@@ -16,6 +16,14 @@ using Subscriptions.Application.External.OutBoundServices;
 using Subscriptions.Domain.Model.Commands;
 using Subscriptions.Infrastructure.IAM;
 using Subscriptions.Interfaces.ACL.Service;
+using Subscriptions.Application.Internal.Consumers;
+using Subscriptions.Application.Internal.Publishers;
+using Subscriptions.Domain.AMQP;
+using Subscriptions.Shared.Application.EventHandlers;
+using Subscriptions.Shared.Application.Hosted;
+using Subscriptions.Shared.Domain.Model.ValueObjects;
+using RabbitMQ.Client;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +96,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+builder.Services.AddScoped<IMessagePublisher, MessagePublisher>();
 //builder.Services.AddScoped<ISubscriptionInfoExternalService,SubscriptionInfoExternalService>();
 
 
@@ -115,7 +124,22 @@ builder.Services.AddHttpClient();
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(8016); // ← importante
-});
+}); 
+var factory = new ConnectionFactory
+{
+    Uri = new Uri(builder.Configuration["Host"]),
+    DispatchConsumersAsync = true
+};
+
+var connection = factory.CreateConnection();
+var channel = connection.CreateModel();
+
+builder.Services.AddSingleton(connection);
+builder.Services.AddSingleton(channel);
+builder.Services.AddSingleton(new RabbitMqChannelWrapper(channel));
+builder.Services.AddSingleton<MessageConsumer>();
+builder.Services.AddHostedService<RabbitMqConsumerHostedService>();
+
 
 var app = builder.Build();
 
@@ -124,8 +148,9 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
     context.Database.EnsureCreated();
-    
-    
+
+    services.StartPublishing(builder.Configuration, channel);
+
     var planCommandService = services.GetRequiredService<IPlanCommandService>();
     await planCommandService.Handle(new CreatePlanCommand("Plan Premium", "El plan premium te permitira acceder a funcionalidades adicionales en la aplicacion", 20));
     
