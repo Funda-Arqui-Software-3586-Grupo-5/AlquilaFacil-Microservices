@@ -3,42 +3,61 @@
     {
       "DownstreamPathTemplate": "/api/v1/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [ { "Host": "iam-api", "Port": 8012 } ],
+      "DownstreamHostAndPorts": [
+        { "Host": "iam-api", "Port": 8012 },
+        { "Host": "iam-api", "Port": 8013 },
+        { "Host": "iam-api", "Port": 8014 }
+      ],
       "UpstreamPathTemplate": "/iam/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/v1/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [ { "Host": "local-api", "Port": 8013 } ],
+      "DownstreamHostAndPorts": [
+        { "Host": "local-api", "Port": 8013 },
+        { "Host": "local-api", "Port": 8014 }
+      ],
       "UpstreamPathTemplate": "/local/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/v1/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [ { "Host": "notification-api", "Port": 8014 } ],
+      "DownstreamHostAndPorts": [
+        { "Host": "notification-api", "Port": 8014 },
+        { "Host": "notification-api", "Port": 8015 }
+      ],
       "UpstreamPathTemplate": "/notification/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/v1/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [ { "Host": "profile-api", "Port": 8015 } ],
+      "DownstreamHostAndPorts": [
+        { "Host": "profile-api", "Port": 8015 },
+        { "Host": "profile-api", "Port": 8016 }
+      ],
       "UpstreamPathTemplate": "/profile/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/v1/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [ { "Host": "subscription-api", "Port": 8016 } ],
+      "DownstreamHostAndPorts": [
+        { "Host": "subscription-api", "Port": 8016 },
+        { "Host": "subscription-api", "Port": 8017 }
+      ],
       "UpstreamPathTemplate": "/subscription/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     },
     {
       "DownstreamPathTemplate": "/api/v1/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [ { "Host": "booking-api", "Port": 8017 } ],
+      "DownstreamHostAndPorts": [
+        { "Host": "booking-api", "Port": 8017 },
+        { "Host": "booking-api", "Port": 8018 }
+      ],
       "UpstreamPathTemplate": "/booking/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
     }
