@@ -31,8 +31,8 @@ docker-compose up --build
     - MySQL: `http://localhost:3306`
     - IAM: `http://localhost:8012`
     - Local Management: `http://localhost:8013`
-    - Profile: `http://localhost:8014`
-    - Notification: `http://localhost:8015`
+    - Notification: `http://localhost:8014`
+    - Profile: `http://localhost:8015`
     - Subscription: `http://localhost:8016`
     - Booking: `http://localhost:8017`
 
