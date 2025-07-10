@@ -172,6 +172,7 @@ public class SubscriptionsController(
      * This endpoint retrieves all subscriptions for a list of users.
      * </remarks>
      * <returns>A list of subscription resources for the specified users</returns>
+     * <param name="usersId">A list of user IDs to retrieve subscriptions for</param>
      * <response code="200">Returns the list of subscription resources&#xA;
      * Success Example:
      * [

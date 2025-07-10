@@ -240,6 +240,7 @@ public class LocalsController(ILocalCommandService localCommandService, ILocalQu
      *    "photoUrl": "http://example.com/photo.jpg",
      *    "userId": 1,
      *    "features": "WiFi, Parking"
+     * }
      * </remarks>
      * <returns>The updated local resource</returns>
      * <response code="200">Returns the updated local resource&#xA;
@@ -322,6 +323,7 @@ public class LocalsController(ILocalCommandService localCommandService, ILocalQu
     *   "message": "Invalid parameters"
     * }
     * </response>
+     * <response code="401">If the user is not authenticated</response>
     * <response code="500">If an internal error occurs</response>
     */
     [HttpGet("search-by-category-id-capacity-range/{categoryId:int}/{minCapacity:int}/{maxCapacity:int}")]
