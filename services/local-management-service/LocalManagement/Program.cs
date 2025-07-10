@@ -1,3 +1,4 @@
+using System.Reflection;
 using LocalManagement.Application.External;
 using LocalManagement.Application.External.OutboundServices;
 using LocalManagement.Application.Internal.CommandServices;
@@ -76,6 +77,9 @@ builder.Services.AddSwaggerGen(
                     Url = new Uri("https://www.apache.org/licenses/LICENSE-2.0.html")
                 }
             });
+        // using System.Reflection;
+        var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     });
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
